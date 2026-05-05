@@ -1335,7 +1335,8 @@
 
         // Update summary
         document.getElementById('summary').classList.add('visible');
-        document.getElementById('deliveryToggle').classList.add('visible');
+        // (toggle Email/WhatsApp oculto en este MVP — flow es descarga directa)
+        // document.getElementById('deliveryToggle').classList.add('visible');
         document.getElementById('ha-val').textContent = ha.toFixed(1).replace('.', ',') + ' ha';
         document.getElementById('tier-val').textContent = tier.name;
         document.getElementById('price-val').textContent = 'USD ' + tier.price;
@@ -1344,7 +1345,12 @@
         const btn = document.getElementById('ctaBtn');
         btn.disabled = false;
         btn.style.opacity = 1;
-        btn.innerHTML = `Pagar USD ${tier.price} y generar informe <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
+        btn.innerHTML = `Generar informe (gratis MVP) <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
+
+        // Guardar referencia para submit
+        window._currentKmlFile = file;
+        window._currentTier = tier;
+        window._currentHa = ha;
       } catch (err) {
         alert('No pudimos leer el archivo. Verificá que sea un KML válido.');
         console.error(err);
@@ -1375,6 +1381,204 @@
       document.getElementById('deliveryEmail').style.display = method === 'email' ? 'block' : 'none';
       document.getElementById('deliveryPhone').style.display = method === 'whatsapp' ? 'block' : 'none';
     });
+  });
+
+  // ============ BACKEND SUBMIT — flow DESCARGA DIRECTA ============
+  // Backend levantado vía Cloudflare Tunnel (gratuito, temporal).
+  // Cuando deployemos al VPS, cambiar a "https://informes-api.alvaradotierras.com"
+  const BACKEND_URL = "https://component-realized-foreign-employed.trycloudflare.com";
+
+  function showError(msg) {
+    let errBox = document.getElementById('submitError');
+    if (!errBox) {
+      errBox = document.createElement('div');
+      errBox.id = 'submitError';
+      errBox.style.cssText = 'background:#fee; border:1px solid #c00; color:#900; padding:10px 14px; border-radius:8px; margin-top:10px; font-family:Inter,sans-serif; font-size:13px;';
+      const ctaBtn = document.getElementById('ctaBtn');
+      ctaBtn.parentNode.insertBefore(errBox, ctaBtn);
+    }
+    errBox.textContent = msg;
+  }
+
+  function renderProcesando(jobId, mensaje, etaText) {
+    const card = document.querySelector('.hero-upload');
+    if (!card) return;
+    card.innerHTML = `
+      <div style="text-align:center; padding:30px 10px;">
+        <div id="spinner" style="width:64px; height:64px; margin:0 auto 18px; border-radius:50%;
+                    background:#fdf6e6; display:flex; align-items:center; justify-content:center;
+                    border: 3px solid #d79a57; border-top-color: transparent;
+                    animation: spin 1.2s linear infinite;">
+        </div>
+        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+        <h3 style="font-family:'Cormorant Garamond',serif; font-size:24px; color:#2a2118; margin-bottom:10px;">
+          Procesando tu informe
+        </h3>
+        <p id="estadoMsg" style="font-family:'Inter',sans-serif; color:#5a4a36; font-size:14px; margin-bottom:6px;">
+          ${mensaje}
+        </p>
+        <p id="etaMsg" style="font-family:'Inter',sans-serif; color:#8a7a62; font-size:13px; margin-bottom:18px;">
+          ${etaText}
+        </p>
+        <div style="background:#f5f0e6; border-radius:8px; padding:12px;
+                    font-family:'Inter',sans-serif; font-size:12px; color:#8a7a62; word-break:break-all;">
+          ID del trabajo: <strong style="color:#2a2118">${jobId}</strong>
+        </div>
+        <p style="font-family:'Inter',sans-serif; font-size:11px; color:#8a7a62; margin-top:14px;">
+          No cierres esta pestaña — actualizamos el estado automáticamente.
+        </p>
+      </div>
+    `;
+  }
+
+  function renderListo(jobId, nombreCampo) {
+    const card = document.querySelector('.hero-upload');
+    if (!card) return;
+    const downloadUrl = BACKEND_URL + '/api/jobs/' + jobId + '/pdf';
+    card.innerHTML = `
+      <div style="text-align:center; padding:30px 10px;">
+        <div style="width:72px; height:72px; margin:0 auto 18px; border-radius:50%;
+                    background:#e6ecd6; display:flex; align-items:center; justify-content:center;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3f4d28"
+               stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h3 style="font-family:'Cormorant Garamond',serif; font-size:26px; color:#2a2118; margin-bottom:10px;">
+          ¡Tu informe está listo!
+        </h3>
+        <p style="font-family:'Inter',sans-serif; color:#5a4a36; font-size:14px; margin-bottom:24px;">
+          Generamos el PDF de ambientación de <strong>${nombreCampo}</strong>.
+        </p>
+        <a href="${downloadUrl}" download
+           style="display:inline-block; background:#3f4d28; color:white; padding:16px 30px;
+                  border-radius:10px; font-family:'Inter',sans-serif; font-weight:600;
+                  text-decoration:none; font-size:15px;">
+          Descargar PDF →
+        </a>
+        <p style="font-family:'Inter',sans-serif; font-size:11px; color:#8a7a62; margin-top:18px;">
+          ID: ${jobId}
+        </p>
+      </div>
+    `;
+  }
+
+  function renderError(jobId, errorMsg) {
+    const card = document.querySelector('.hero-upload');
+    if (!card) return;
+    card.innerHTML = `
+      <div style="text-align:center; padding:30px 10px;">
+        <h3 style="font-family:'Cormorant Garamond',serif; font-size:22px; color:#900; margin-bottom:14px;">
+          Hubo un error procesando tu informe
+        </h3>
+        <p style="font-family:'Inter',sans-serif; color:#5a4a36; font-size:13px; margin-bottom:14px;">
+          ${errorMsg || 'Error desconocido'}
+        </p>
+        <p style="font-family:'Inter',sans-serif; font-size:12px; color:#8a7a62;">
+          ID: ${jobId} — Escribinos a <a href="mailto:javier@alvaradotierras.com" style="color:#3f4d28">javier@alvaradotierras.com</a>
+        </p>
+      </div>
+    `;
+  }
+
+  async function pollJob(jobId, nombreCampo) {
+    const startTime = Date.now();
+    const checkInterval = 20000; // 20s
+    const maxMinutes = 45;
+
+    const tick = async () => {
+      try {
+        const r = await fetch(BACKEND_URL + '/api/jobs/' + jobId);
+        if (!r.ok) {
+          // 404 = job no existe; fallar
+          if (r.status === 404) { renderError(jobId, 'Job no encontrado'); return; }
+          // Otros: reintentar
+          setTimeout(tick, checkInterval);
+          return;
+        }
+        const data = await r.json();
+        const elapsedMin = Math.floor((Date.now() - startTime) / 60000);
+
+        if (data.status === 'done' && data.pdf_listo) {
+          renderListo(jobId, nombreCampo);
+          return;
+        }
+        if (data.status === 'failed') {
+          renderError(jobId, data.error || 'Procesamiento fallido');
+          return;
+        }
+        if (elapsedMin >= maxMinutes) {
+          renderError(jobId, 'Procesamiento tarda más de lo esperado. Revisaremos manualmente.');
+          return;
+        }
+
+        // Update mensaje de estado
+        const etaMsg = document.getElementById('etaMsg');
+        const estadoMsg = document.getElementById('estadoMsg');
+        if (etaMsg) {
+          const restante = Math.max(1, 30 - elapsedMin);
+          etaMsg.textContent = `Tiempo estimado restante: ~${restante} minutos. (Llevás esperando ${elapsedMin} min)`;
+        }
+        if (estadoMsg) {
+          const labels = {
+            'pending': 'En cola, esperando worker disponible',
+            'processing': 'Analizando datos satelitales y generando mapas',
+          };
+          estadoMsg.textContent = labels[data.status] || data.status;
+        }
+        setTimeout(tick, checkInterval);
+      } catch (err) {
+        // Network error — reintentar
+        console.warn('Poll error:', err);
+        setTimeout(tick, checkInterval);
+      }
+    };
+    setTimeout(tick, 5000); // primer check 5s después
+  }
+
+  document.getElementById('ctaBtn').addEventListener('click', async () => {
+    if (!window._currentKmlFile) {
+      showError('Primero subí un archivo KML.');
+      return;
+    }
+
+    const btn = document.getElementById('ctaBtn');
+    btn.disabled = true;
+    btn.style.opacity = .6;
+    btn.innerHTML = 'Enviando...';
+
+    const nombreCampo = window._currentKmlFile.name.replace(/\.[^.]+$/, '');
+    const fd = new FormData();
+    fd.append('kml', window._currentKmlFile);
+    fd.append('nombre_campo', nombreCampo);
+    fd.append('canal', 'descarga');
+    fd.append('contacto', '');
+    fd.append('mejoras', '');
+    fd.append('nombre_cliente', '');
+
+    try {
+      const r = await fetch(BACKEND_URL + '/api/jobs', {
+        method: 'POST',
+        body: fd,
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({ detail: 'Error desconocido' }));
+        throw new Error(err.detail || ('HTTP ' + r.status));
+      }
+      const data = await r.json();
+      renderProcesando(
+        data.job_id,
+        'Recibimos tu KML, encolando para procesar.',
+        `Tiempo estimado: ~${data.eta_min} minutos.`
+      );
+      pollJob(data.job_id, nombreCampo);
+    } catch (err) {
+      console.error(err);
+      showError('No pudimos enviar tu solicitud. ' + (err.message || ''));
+      btn.disabled = false;
+      btn.style.opacity = 1;
+      btn.innerHTML = 'Reintentar →';
+    }
   });
 </script>
 
