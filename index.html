@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de Ambientación · Alvarado Tierras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --cream: #f5f0e6;
+    --cream-2: #ede4d2;
+    --bg: #faf7f0;
+    --ink: #2a2118;
+    --ink-2: #5a4a36;
+    --muted: #8a7a62;
+    --line: #ddd2bb;
+    --gold: #b08947;
+    --gold-2: #8e6c33;
+    --green: #4a5b2e;
+    --green-2: #344120;
+    --green-soft: #e6ecd6;
+    --shadow-sm: 0 1px 3px rgba(42,33,24,.06);
+    --shadow: 0 4px 20px rgba(42,33,24,.08);
+    --shadow-lg: 0 20px 50px rgba(42,33,24,.15);
+    --radius: 14px;
+    --radius-lg: 20px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+  .container { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+
+  /* ============== STICKY HEADER ============== */
+  header.site {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(245, 240, 230, 0.85);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid transparent;
+    padding: 18px 0;
+    transition: padding .3s ease, border-color .3s ease, background .3s ease;
+  }
+  header.site.scrolled {
+    padding: 10px 0;
+    border-bottom-color: var(--line);
+    background: rgba(245, 240, 230, 0.95);
+  }
+  header.site .row { display: flex; align-items: center; justify-content: space-between; }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    letter-spacing: 5px;
+    color: var(--ink);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+  nav ul { display: flex; list-style: none; gap: 30px; align-items: center; }
+  nav a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: color .2s;
+    position: relative;
+  }
+  nav a:hover { color: var(--ink); }
+  nav a.active { color: var(--green-2); }
+  nav a.active::after {
+    content: '';
+    position: absolute; left: 0; right: 0; bottom: -6px;
+    height: 2px; background: var(--gold);
+  }
+  .nav-cta {
+    background: var(--green-2);
+    color: white !important;
+    padding: 10px 18px;
+    border-radius: 999px;
+    letter-spacing: 0.5px !important;
+    text-transform: none !important;
+    font-size: 13px !important;
+    transition: all .2s;
+  }
+  .nav-cta:hover { background: var(--ink); transform: translateY(-1px); }
+  .nav-cta::after { display: none !important; }
+
+  /* ============== HERO ============== */
+  .hero {
+    padding: 140px 0 80px;
+    background:
+      radial-gradient(ellipse at top right, rgba(176,137,71,.08), transparent 50%),
+      radial-gradient(ellipse at bottom left, rgba(74,91,46,.06), transparent 50%),
+      var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: .25;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 56px;
+    align-items: center;
+    position: relative;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--gold-2);
+    font-weight: 600;
+    margin-bottom: 22px;
+    padding: 6px 12px;
+    background: rgba(176,137,71,.1);
+    border-radius: 999px;
+    width: fit-content;
+  }
+  .eyebrow::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--gold); border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.3); }
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 5.5vw, 64px);
+    font-weight: 500;
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 22px;
+    letter-spacing: -1px;
+  }
+  .hero h1 em { font-style: italic; color: var(--green-2); position: relative; }
+  .hero h1 em::after {
+    content: '';
+    position: absolute; left: 0; right: 0; bottom: -4px;
+    height: 8px;
+    background: linear-gradient(90deg, transparent, rgba(176,137,71,.35), transparent);
+    border-radius: 4px;
+  }
+  .hero p.lead {
+    font-size: 18px;
+    color: var(--ink-2);
+    max-width: 520px;
+    margin-bottom: 28px;
+  }
+  .hero-stats {
+    display: flex; gap: 32px;
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+  }
+  .hero-stat .num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    color: var(--green-2);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .hero-stat .lbl {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 4px;
+  }
+
+  /* HERO upload card (right side) */
+  .hero-upload {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--line);
+    position: relative;
+  }
+  .hero-upload .badge {
+    position: absolute; top: -12px; right: 24px;
+    background: var(--green-2);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .upload-zone {
+    border: 2px dashed var(--line);
+    border-radius: var(--radius);
+    padding: 36px 20px;
+    text-align: center;
+    background: var(--bg);
+    cursor: pointer;
+    transition: all .25s ease;
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--gold);
+    background: var(--cream);
+    transform: scale(1.01);
+  }
+  .upload-zone .icon-wrap {
+    width: 56px; height: 56px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: var(--green-soft);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--green-2);
+    transition: all .25s;
+  }
+  .upload-zone:hover .icon-wrap { transform: translateY(-3px); background: var(--cream-2); }
+  .upload-zone .label {
+    color: var(--ink);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .upload-zone .hint {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .upload-zone input[type=file] { display: none; }
+
+  #map-preview {
+    height: 260px;
+    border-radius: var(--radius);
+    margin-top: 16px;
+    display: none;
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  #map-preview.visible { display: block; animation: slideDown .4s ease; }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .field-summary {
+    display: none;
+    margin-top: 16px;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--green-soft), rgba(230,236,214,.5));
+    border-radius: var(--radius);
+    border: 1px solid #c7d3a3;
+  }
+  .field-summary.visible { display: block; animation: slideDown .4s ease; }
+  .field-summary .row {
+    display: flex; justify-content: space-between;
+    padding: 4px 0;
+    font-size: 14px;
+  }
+  .field-summary .row.total {
+    border-top: 1px dashed #b8c98e;
+    margin-top: 8px;
+    padding-top: 12px;
+    font-weight: 700;
+    color: var(--green-2);
+    font-size: 16px;
+  }
+  .field-summary .delivery {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: white;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .field-summary .delivery strong { color: var(--green-2); }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--green-2);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    margin-top: 16px;
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn-primary:hover { background: var(--ink); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(52,65,32,.25); }
+  .btn-primary svg { transition: transform .2s; }
+  .btn-primary:hover svg { transform: translateX(4px); }
+
+  /* ============== DELIVERY TOGGLE ============== */
+  .delivery-toggle {
+    display: none;
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+  }
+  .delivery-toggle.visible { display: block; animation: slideDown .4s ease; }
+  .delivery-toggle .lbl {
+    font-size: 12px; font-weight: 600;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+  }
+  .toggle-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .toggle-opt {
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 8px;
+    background: white;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-2);
+    font-family: inherit;
+  }
+  .toggle-opt:hover { border-color: var(--gold); color: var(--ink); }
+  .toggle-opt.active {
+    border-color: var(--green-2);
+    background: var(--green-soft);
+    color: var(--green-2);
+  }
+  .toggle-opt svg { flex-shrink: 0; }
+  .delivery-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    background: white;
+    color: var(--ink);
+  }
+  .delivery-input:focus { outline: none; border-color: var(--gold); }
+
+  /* ============== TRUST STRIP ============== */
+  .trust {
+    background: white;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 28px 0;
+  }
+  .trust-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 48px; flex-wrap: wrap;
+  }
+  .trust-row .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .trust-row .source {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: var(--ink-2);
+    opacity: 0.7;
+    transition: opacity .2s;
+    font-weight: 500;
+  }
+  .trust-row .source:hover { opacity: 1; color: var(--ink); }
+
+  /* ============== SECTIONS ============== */
+  section { padding: 100px 0; }
+  .section-head { text-align: center; max-width: 680px; margin: 0 auto 60px; }
+  .section-head .eyebrow { margin-left: auto; margin-right: auto; }
+  .section-head h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 44px);
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    margin-bottom: 14px;
+  }
+  .section-head p {
+    color: var(--ink-2);
+    font-size: 17px;
+  }
+
+  /* ============== COMPARISON ============== */
+  .comparison {
+    background: linear-gradient(180deg, var(--bg), var(--cream) 50%, var(--bg));
+  }
+  .comp-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 24px;
+    max-width: 980px;
+    margin: 0 auto;
+    align-items: stretch;
+  }
+  .comp-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 36px 32px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--line);
+    position: relative;
+  }
+  .comp-card.winner {
+    border: 2px solid var(--green-2);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(180deg, white, var(--green-soft));
+  }
+  .comp-card .tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .comp-card.winner .tag { color: var(--green-2); }
+  .comp-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    color: var(--ink);
+    margin-bottom: 24px;
+    font-weight: 500;
+  }
+  .comp-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .comp-row:last-child { border-bottom: none; }
+  .comp-row .key { color: var(--muted); }
+  .comp-row .val {
+    color: var(--ink); font-weight: 600;
+    text-align: right;
+  }
+  .comp-card.winner .comp-row .val { color: var(--green-2); }
+  .vs-badge {
+    align-self: center;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 500;
+    box-shadow: var(--shadow);
+  }
+
+  /* ============== STEPS ============== */
+  .how { background: var(--bg); }
+  .how-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .step-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 36px 28px;
+    border: 1px solid var(--line);
+    position: relative;
+    transition: transform .3s, box-shadow .3s;
+  }
+  .step-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .step-num {
+    position: absolute;
+    top: 24px; right: 28px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 64px;
+    color: var(--cream-2);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .step-card .icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: var(--green-soft);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--green-2);
+    margin-bottom: 20px;
+  }
+  .step-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    color: var(--ink);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .step-card p { color: var(--ink-2); font-size: 15px; }
+
+  /* ============== DEMO PDF ============== */
+  .demo {
+    background: linear-gradient(180deg, var(--cream), var(--bg));
+  }
+  .pdf-showcase {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .pdf-stack {
+    position: relative;
+    aspect-ratio: 1;
+    perspective: 1200px;
+  }
+  .pdf-page-mock {
+    position: absolute;
+    width: 75%; aspect-ratio: 210/297;
+    background: white;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-lg);
+    border-radius: 6px;
+    padding: 20px;
+    font-size: 9px;
+    transition: transform .4s ease;
+  }
+  .pdf-page-mock.p1 { left: 0; top: 0; transform: rotate(-6deg); z-index: 1; }
+  .pdf-page-mock.p2 { left: 12%; top: 8%; transform: rotate(-2deg); z-index: 2; }
+  .pdf-page-mock.p3 { right: 0; bottom: 0; transform: rotate(4deg); z-index: 3; }
+  .pdf-stack:hover .p1 { transform: rotate(-10deg) translateX(-10px); }
+  .pdf-stack:hover .p3 { transform: rotate(8deg) translateX(10px); }
+  .mini-header {
+    display: flex; justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+    font-size: 7px;
+    color: var(--muted);
+  }
+  .mini-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 12px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .mini-map {
+    aspect-ratio: 4/3;
+    background:
+      radial-gradient(circle at 30% 30%, #6b8a3a, transparent 30%),
+      radial-gradient(circle at 70% 60%, #a89055, transparent 35%),
+      linear-gradient(135deg, #c9d4a3, #8fa05a, #d4b87a);
+    border-radius: 4px;
+    margin: 8px 0;
+  }
+  .mini-bar {
+    height: 5px; border-radius: 2px;
+    background: var(--cream-2);
+    margin: 4px 0;
+  }
+  .mini-bar.short { width: 55%; }
+  .mini-bar.med { width: 75%; }
+  .mini-row {
+    display: flex; justify-content: space-between;
+    font-size: 7px;
+    padding: 3px 0;
+    border-bottom: 1px dotted var(--line);
+    color: var(--ink-2);
+  }
+  .mini-pie {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: conic-gradient(var(--green-2) 0% 35%, var(--gold) 35% 60%, var(--ink-2) 60% 100%);
+    margin: 10px auto;
+  }
+
+  .pdf-info h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    color: var(--ink);
+    margin-bottom: 16px;
+    font-weight: 500;
+    line-height: 1.15;
+  }
+  .pdf-info > p {
+    color: var(--ink-2);
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+  .pdf-features {
+    list-style: none;
+    margin-bottom: 28px;
+  }
+  .pdf-features li {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 0;
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+  .pdf-features li svg {
+    flex-shrink: 0;
+    color: var(--green-2);
+    margin-top: 3px;
+  }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent;
+    color: var(--green-2);
+    border: 1.5px solid var(--green-2);
+    padding: 12px 22px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all .2s;
+  }
+  .btn-secondary:hover { background: var(--green-2); color: white; transform: translateY(-2px); }
+
+  /* ============== PRICING ============== */
+  .pricing { background: var(--bg); }
+  .price-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .price-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 32px 24px;
+    text-align: center;
+    transition: all .3s;
+    position: relative;
+  }
+  .price-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+  .price-card.featured {
+    border: 2px solid var(--gold);
+    background: linear-gradient(180deg, white, #fdfaf2);
+    transform: scale(1.04);
+  }
+  .price-card.featured::before {
+    content: 'Más elegido';
+    position: absolute;
+    top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--gold);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 999px;
+  }
+  .price-card .tier {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .price-card .amount {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    color: var(--ink);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .price-card .amount small {
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 400;
+    margin-right: 4px;
+  }
+  .price-card .ha {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 14px 0 24px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .price-card .perks {
+    list-style: none;
+    text-align: left;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .price-card .perks li {
+    padding: 6px 0;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .price-card .perks li::before {
+    content: '✓'; color: var(--green-2); font-weight: bold;
+  }
+
+  /* ============== TESTIMONIAL ============== */
+  .testimonial {
+    background: var(--ink);
+    color: var(--cream);
+    text-align: center;
+  }
+  .testimonial blockquote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(24px, 3vw, 34px);
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.35;
+    max-width: 820px;
+    margin: 0 auto 32px;
+    color: white;
+  }
+  .testimonial blockquote::before { content: '"'; color: var(--gold); font-size: 64px; line-height: 0; vertical-align: -28px; margin-right: 6px; }
+  .testimonial .author {
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    color: var(--cream-2);
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+  .testimonial .author strong { color: white; display: block; font-size: 16px; margin-bottom: 4px; }
+
+  /* ============== FAQ ============== */
+  .faq { background: var(--bg); }
+  .faq-list { max-width: 760px; margin: 0 auto; }
+  .faq-item {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .faq-item:hover { box-shadow: var(--shadow-sm); }
+  .faq-q {
+    width: 100%;
+    background: none;
+    border: none;
+    font-family: inherit;
+    text-align: left;
+    padding: 22px 24px;
+    font-size: 16px;
+    color: var(--ink);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 16px;
+  }
+  .faq-q .plus {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold);
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: transform .25s;
+  }
+  .faq-item.open .faq-q .plus { transform: rotate(45deg); background: var(--gold); color: white; border-color: var(--gold); }
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease;
+    padding: 0 24px;
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+  .faq-item.open .faq-a {
+    max-height: 240px;
+    padding-bottom: 22px;
+  }
+
+  /* ============== CTA STRIP ============== */
+  .cta-strip {
+    background: linear-gradient(135deg, var(--green-2), var(--ink));
+    color: white;
+    text-align: center;
+    padding: 80px 0;
+  }
+  .cta-strip h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4vw, 44px);
+    font-weight: 500;
+    margin-bottom: 14px;
+    color: white;
+  }
+  .cta-strip p { color: var(--cream-2); font-size: 17px; margin-bottom: 28px; }
+  .cta-strip .btn-light {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: white; color: var(--ink);
+    padding: 16px 32px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all .2s;
+  }
+  .cta-strip .btn-light:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,.25); }
+
+  /* ============== FOOTER ============== */
+  footer {
+    background: var(--ink);
+    color: var(--cream-2);
+    padding: 50px 0 30px;
+  }
+  footer .row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    flex-wrap: wrap; gap: 24px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid #3a2f24;
+  }
+  footer .logo { color: var(--cream); }
+  footer .copy {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ============== SCROLL REVEAL ============== */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* ============== RESPONSIVE ============== */
+  @media (max-width: 900px) {
+    .hero { padding: 110px 0 60px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    .comp-grid { grid-template-columns: 1fr; }
+    .vs-badge { margin: 0 auto; }
+    .pdf-showcase { grid-template-columns: 1fr; }
+    .price-grid { grid-template-columns: 1fr 1fr; }
+    .how-grid { grid-template-columns: 1fr; }
+    .pdf-stack { aspect-ratio: 4/3; }
+    nav ul { gap: 14px; }
+    nav ul li:not(:last-child):not(:first-child) { display: none; }
+    .trust-row { gap: 24px; }
+    .trust-row .label { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="site" id="hdr">
+  <div class="container row">
+    <a href="#" class="logo">A<span>·</span>T</a>
+    <nav>
+      <ul>
+        <li><a href="#">Inicio</a></li>
+        <li><a href="#">Equipo</a></li>
+        <li><a href="#">Comprar</a></li>
+        <li><a href="#">Vender</a></li>
+        <li><a href="#" class="active">Informes</a></li>
+        <li><a href="#solicitar" class="nav-cta">Solicitar informe</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Nuevo · Tecnología satelital</div>
+        <h1>El informe de ambientación de tu campo,<br><em>en 30 minutos</em>.</h1>
+        <p class="lead">Subí el KML del campo y recibís un informe agronómico profesional con clasificación de ambientes, aptitud productiva y carga animal — basado en datos oficiales de INTA, Sentinel-2 y NASA.</p>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="num">30 min</div>
+            <div class="lbl">Tiempo de entrega</div>
+          </div>
+          <div class="hero-stat">
+            <div class="num">USD 20</div>
+            <div class="lbl">Desde</div>
+          </div>
+          <div class="hero-stat">
+            <div class="num">5</div>
+            <div class="lbl">Fuentes oficiales</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-upload" id="solicitar">
+        <span class="badge">Empezá acá</span>
+        <label for="kml-input" class="upload-zone" id="dropZone">
+          <div class="icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="label">Arrastrá tu KML o KMZ</div>
+          <div class="hint">o hacé click para seleccionar · máx 10 MB</div>
+          <input type="file" id="kml-input" accept=".kml,.kmz">
+        </label>
+
+        <div id="map-preview"></div>
+
+        <div class="field-summary" id="summary">
+          <div class="row"><span style="color:var(--muted)">Superficie</span><strong id="ha-val">—</strong></div>
+          <div class="row"><span style="color:var(--muted)">Tier</span><strong id="tier-val">—</strong></div>
+          <div class="row total"><span>Total</span><span id="price-val">—</span></div>
+          <div class="delivery">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Estimado de entrega: <strong id="eta">—</strong>
+          </div>
+        </div>
+
+        <div class="delivery-toggle" id="deliveryToggle">
+          <div class="lbl">¿Cómo querés recibir el informe?</div>
+          <div class="toggle-row">
+            <button type="button" class="toggle-opt active" data-method="email">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Email
+            </button>
+            <button type="button" class="toggle-opt" data-method="whatsapp">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              WhatsApp
+            </button>
+          </div>
+          <input type="email" class="delivery-input" id="deliveryEmail" placeholder="tu@email.com">
+          <input type="tel" class="delivery-input" id="deliveryPhone" placeholder="+54 9 11 1234 5678" style="display:none">
+        </div>
+
+        <button class="btn-primary" id="ctaBtn" disabled style="opacity:.5">
+          Subí un KML para continuar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRUST STRIP ============ -->
+<div class="trust">
+  <div class="container">
+    <div class="trust-row">
+      <span class="label">Datos oficiales de</span>
+      <span class="source">INTA · Carta de Suelos</span>
+      <span class="source">Sentinel-2 · ESA</span>
+      <span class="source">DEM Copernicus</span>
+      <span class="source">NASA POWER</span>
+      <span class="source">MAGyP · Estimaciones</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ COMPARISON ============ -->
+<section class="comparison">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">El cambio</div>
+      <h2>Lo que antes tomaba semanas, ahora en minutos.</h2>
+      <p>Mismo rigor técnico que un consultor agronómico — automatizado con datos satelitales y oficiales.</p>
+    </div>
+    <div class="comp-grid reveal">
+      <div class="comp-card">
+        <div class="tag">Consultor tradicional</div>
+        <h3>Informe profesional</h3>
+        <div class="comp-row"><span class="key">Costo</span><span class="val">USD 1.200 — 2.500</span></div>
+        <div class="comp-row"><span class="key">Tiempo</span><span class="val">2 — 4 semanas</span></div>
+        <div class="comp-row"><span class="key">Fuentes de datos</span><span class="val">Variable</span></div>
+        <div class="comp-row"><span class="key">Disponibilidad</span><span class="val">Coordinada</span></div>
+        <div class="comp-row"><span class="key">Reproducible</span><span class="val">No</span></div>
+      </div>
+      <div class="vs-badge">vs</div>
+      <div class="comp-card winner">
+        <div class="tag">Alvarado Tierras · Informes</div>
+        <h3>Informe automatizado</h3>
+        <div class="comp-row"><span class="key">Costo</span><span class="val">USD 20 — 199</span></div>
+        <div class="comp-row"><span class="key">Tiempo</span><span class="val">30 minutos</span></div>
+        <div class="comp-row"><span class="key">Fuentes de datos</span><span class="val">5 oficiales</span></div>
+        <div class="comp-row"><span class="key">Disponibilidad</span><span class="val">24/7 self-serve</span></div>
+        <div class="comp-row"><span class="key">Reproducible</span><span class="val">Sí, auditable</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="how">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Tres pasos</div>
+      <h2>Simple para vos. Profundo en el análisis.</h2>
+    </div>
+    <div class="how-grid">
+      <div class="step-card reveal">
+        <div class="step-num">01</div>
+        <div class="icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <h3>Subís el KML</h3>
+        <p>Arrastrá el archivo de tu campo (KML o KMZ). Ves en pantalla las hectáreas y el polígono dibujado en el mapa.</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">02</div>
+        <div class="icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
+        <h3>Contás las mejoras</h3>
+        <p>Casas, molinos, aguadas, alambrados, mejoradores. Suma una sección descriptiva al PDF final del informe.</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">03</div>
+        <div class="icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h3>Recibís el PDF</h3>
+        <p>En 30 minutos te llega por email. Descargable, compartible, con tu campo analizado a nivel profesional.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEMO PDF ============ -->
+<section class="demo">
+  <div class="container">
+    <div class="pdf-showcase">
+      <div class="pdf-stack reveal">
+        <div class="pdf-page-mock p1">
+          <div class="mini-header"><span>ALVARADO TIERRAS</span><span>1/12</span></div>
+          <div class="mini-title">Informe de Ambientación</div>
+          <div style="font-size:7px;color:var(--muted)">Campo Demo · 545 ha · BsAs</div>
+          <div class="mini-map" style="height:55%;margin-top:14px;"></div>
+          <div class="mini-bar med"></div>
+          <div class="mini-bar short"></div>
+        </div>
+        <div class="pdf-page-mock p2">
+          <div class="mini-header"><span>MAPA AMBIENTES</span><span>4/12</span></div>
+          <div class="mini-title">Clasificación V7</div>
+          <div class="mini-map"></div>
+          <div class="mini-row"><span>Loma alta</span><span style="color:var(--green-2);font-weight:bold">336 ha</span></div>
+          <div class="mini-row"><span>Plano</span><span style="color:var(--gold);font-weight:bold">157 ha</span></div>
+          <div class="mini-row"><span>Bajo</span><span style="color:var(--ink-2);font-weight:bold">52 ha</span></div>
+        </div>
+        <div class="pdf-page-mock p3">
+          <div class="mini-header"><span>FACTIBILIDADES</span><span>10/12</span></div>
+          <div class="mini-title">Aptitud y carga</div>
+          <div class="mini-pie"></div>
+          <div style="background:var(--cream);padding:6px;border-radius:3px;margin:6px 0;">
+            <div style="font-size:7px;color:var(--green-2);font-weight:bold;letter-spacing:.5px">CARGA ANIMAL</div>
+            <div style="font-size:11px;color:var(--ink);font-family:'Cormorant Garamond',serif;font-weight:600">0.8 — 1.1 EV/ha</div>
+          </div>
+          <div style="background:var(--cream);padding:6px;border-radius:3px;">
+            <div style="font-size:7px;color:var(--green-2);font-weight:bold;letter-spacing:.5px">RINDE SOJA</div>
+            <div style="font-size:11px;color:var(--ink);font-family:'Cormorant Garamond',serif;font-weight:600">29 qq/ha</div>
+          </div>
+        </div>
+      </div>
+      <div class="pdf-info reveal">
+        <h3>Un PDF que vale lo que un informe profesional.</h3>
+        <p>Doce páginas con mapas, tablas, factibilidades y recomendaciones — listo para mostrar a un comprador, asesor o financiador.</p>
+        <ul class="pdf-features">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Clasificación de ambientes (loma alta / plano / bajo) con porcentajes</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Mapas en alta resolución sobre carta INTA + Sentinel-2</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Aptitud productiva por hectárea (agrícola / ganadera / mixta)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Carga animal estimada y rinde histórico del departamento</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Análisis climático 30 años (NASA POWER)</li>
+        </ul>
+        <a href="#" class="btn-secondary">
+          Ver PDF de muestra completo
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section class="pricing">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Precio único</div>
+      <h2>Pagás una vez. Sin suscripción.</h2>
+      <p>El precio se calcula automáticamente según las hectáreas de tu campo.</p>
+    </div>
+    <div class="price-grid">
+      <div class="price-card reveal">
+        <div class="tier">Express</div>
+        <div class="amount"><small>USD</small>20</div>
+        <div class="ha">menos de 200 ha</div>
+        <ul class="perks">
+          <li>Informe completo PDF</li>
+          <li>Entrega en 30 min</li>
+          <li>Soporte por email</li>
+        </ul>
+      </div>
+      <div class="price-card featured reveal">
+        <div class="tier">Standard</div>
+        <div class="amount"><small>USD</small>49</div>
+        <div class="ha">200 — 1.000 ha</div>
+        <ul class="perks">
+          <li>Informe completo PDF</li>
+          <li>Análisis multi-ambiente</li>
+          <li>Sección mejoras detallada</li>
+          <li>Entrega prioritaria</li>
+        </ul>
+      </div>
+      <div class="price-card reveal">
+        <div class="tier">Premium</div>
+        <div class="amount"><small>USD</small>99</div>
+        <div class="ha">1.000 — 5.000 ha</div>
+        <ul class="perks">
+          <li>Todo de Standard</li>
+          <li>Análisis por potrero</li>
+          <li>Recomendaciones extendidas</li>
+        </ul>
+      </div>
+      <div class="price-card reveal">
+        <div class="tier">Enterprise</div>
+        <div class="amount"><small>USD</small>199</div>
+        <div class="ha">más de 5.000 ha</div>
+        <ul class="perks">
+          <li>Todo de Premium</li>
+          <li>Soporte dedicado</li>
+          <li>Revisión humana</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIAL ============ -->
+<section class="testimonial">
+  <div class="container">
+    <blockquote>El nivel de detalle y la velocidad nos cambió el proceso de pre-listing. Lo que antes pedíamos a un consultor cada vez, ahora lo tenemos antes de la primera reunión con el vendedor.</blockquote>
+    <div class="author"><strong>Equipo Alvarado Tierras</strong>Saladillo, Buenos Aires</div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="faq">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Preguntas frecuentes</div>
+      <h2>Lo que querés saber antes de empezar.</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q">¿Qué fuentes de datos usan? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Carta de Suelos INTA 1:50.000, imágenes Sentinel-2 de la temporada, DEM Copernicus 30m, NASA POWER (30 años de clima) y MAGyP Estimaciones Agrícolas (rindes históricos del departamento). Todo público y oficial.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">¿Sirve para vender mi campo? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Sí. El informe muestra ambientes, aptitud productiva, carga animal y rinde histórico — material concreto para mostrar a compradores, tasador o broker.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">¿En qué provincias funciona? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Por ahora Argentina (todas las provincias con cobertura de carta INTA). Próximamente Uruguay, Paraguay y sur de Brasil.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">¿Necesito conocimientos técnicos para entender el informe? <span class="plus">+</span></button>
+        <div class="faq-a"><p>No. El PDF está pensado para productor, comprador y asesor — explicaciones claras, mapas legibles, tablas y recomendaciones agronómicas concretas.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">¿Qué pasa si no tengo el KML del campo? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Escribinos a javier@alvaradotierras.com — podemos generarlo desde la nomenclatura catastral (servicio adicional, USD 15).</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">¿Cómo se paga? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Stripe para tarjeta internacional (USD) o Mercado Pago para pago local (ARS). Cobro único, sin renovación.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">¿Cómo me llega el informe? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Como prefieras: te lo mandamos por email o por WhatsApp al número que nos indiques. En ambos casos recibís el PDF descargable + un resumen ejecutivo del campo.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA STRIP ============ -->
+<section class="cta-strip">
+  <div class="container">
+    <h2>Tu campo, analizado en 30 minutos.</h2>
+    <p>Subí el KML y empezá ahora.</p>
+    <a href="#solicitar" class="btn-light">
+      Solicitar informe
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div>
+        <div class="logo" style="margin-bottom:10px">A<span>·</span>T</div>
+        <p style="font-size:13px;max-width:280px">Alvarado Tierras — inmobiliaria rural y servicios técnicos para el campo argentino.</p>
+      </div>
+      <div>
+        <p style="font-size:13px"><strong style="color:white">Contacto</strong><br>javier@alvaradotierras.com<br>+54 9 11 4434 6658<br>Saladillo, Buenos Aires</p>
+      </div>
+      <div>
+        <p style="font-size:13px"><strong style="color:white">Servicios</strong><br>Comprar Campo<br>Vender Campo<br>Informes de Ambientación</p>
+      </div>
+    </div>
+    <div class="copy">© 2026 Alvarado Tierras · Todos los derechos reservados</div>
+  </div>
+</footer>
+
+<!-- ============ JS ============ -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // STICKY HEADER
+  const hdr = document.getElementById('hdr');
+  window.addEventListener('scroll', () => {
+    hdr.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  // SCROLL REVEAL
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // FAQ ACCORDION
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.parentElement;
+      document.querySelectorAll('.faq-item').forEach(i => i !== item && i.classList.remove('open'));
+      item.classList.toggle('open');
+    });
+  });
+
+  // ============ KML PARSING + MAP ============
+  let map, polygonLayer;
+
+  function initMap() {
+    if (map) return;
+    map = L.map('map-preview', { zoomControl: false, attributionControl: false }).setView([-35, -60], 5);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18
+    }).addTo(map);
+  }
+
+  function parseKML(text) {
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, 'text/xml');
+    const coordsNodes = xml.getElementsByTagName('coordinates');
+    const polygons = [];
+    for (const node of coordsNodes) {
+      const raw = node.textContent.trim();
+      const coords = raw.split(/\s+/).map(p => {
+        const [lon, lat] = p.split(',').map(Number);
+        return [lat, lon];
+      }).filter(([lat, lon]) => !isNaN(lat) && !isNaN(lon));
+      if (coords.length > 2) polygons.push(coords);
+    }
+    return polygons;
+  }
+
+  // Shoelace for area in m^2 (approximate, equirectangular projection at centroid)
+  function polygonArea(coords) {
+    if (coords.length < 3) return 0;
+    const R = 6378137;
+    const latC = coords.reduce((s, [la]) => s + la, 0) / coords.length;
+    const cosLat = Math.cos(latC * Math.PI / 180);
+    const xy = coords.map(([la, lo]) => [lo * Math.PI / 180 * R * cosLat, la * Math.PI / 180 * R]);
+    let area = 0;
+    for (let i = 0; i < xy.length; i++) {
+      const [x1, y1] = xy[i];
+      const [x2, y2] = xy[(i + 1) % xy.length];
+      area += x1 * y2 - x2 * y1;
+    }
+    return Math.abs(area) / 2;
+  }
+
+  function tierFor(ha) {
+    if (ha < 200) return { name: 'Express', price: 20 };
+    if (ha < 1000) return { name: 'Standard', price: 49 };
+    if (ha < 5000) return { name: 'Premium', price: 99 };
+    return { name: 'Enterprise', price: 199 };
+  }
+
+  function etaTime() {
+    const d = new Date(Date.now() + 30 * 60000);
+    return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) + ' hs';
+  }
+
+  function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const polys = parseKML(e.target.result);
+        if (!polys.length) { alert('No se encontraron polígonos en el archivo.'); return; }
+        const totalM2 = polys.reduce((s, p) => s + polygonArea(p), 0);
+        const ha = totalM2 / 10000;
+        const tier = tierFor(ha);
+
+        // Show map
+        document.getElementById('map-preview').classList.add('visible');
+        setTimeout(() => {
+          initMap();
+          if (polygonLayer) map.removeLayer(polygonLayer);
+          polygonLayer = L.polygon(polys, {
+            color: '#b08947', weight: 2.5, fillColor: '#b08947', fillOpacity: 0.25
+          }).addTo(map);
+          map.fitBounds(polygonLayer.getBounds(), { padding: [20, 20] });
+          map.invalidateSize();
+        }, 100);
+
+        // Update summary
+        document.getElementById('summary').classList.add('visible');
+        document.getElementById('deliveryToggle').classList.add('visible');
+        document.getElementById('ha-val').textContent = ha.toFixed(1).replace('.', ',') + ' ha';
+        document.getElementById('tier-val').textContent = tier.name;
+        document.getElementById('price-val').textContent = 'USD ' + tier.price;
+        document.getElementById('eta').textContent = etaTime();
+
+        const btn = document.getElementById('ctaBtn');
+        btn.disabled = false;
+        btn.style.opacity = 1;
+        btn.innerHTML = `Pagar USD ${tier.price} y generar informe <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
+      } catch (err) {
+        alert('No pudimos leer el archivo. Verificá que sea un KML válido.');
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  const dropZone = document.getElementById('dropZone');
+  const input = document.getElementById('kml-input');
+  input.addEventListener('change', (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+  ['dragenter','dragover'].forEach(ev => dropZone.addEventListener(ev, (e) => {
+    e.preventDefault(); e.stopPropagation(); dropZone.classList.add('dragover');
+  }));
+  ['dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, (e) => {
+    e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('dragover');
+  }));
+  dropZone.addEventListener('drop', (e) => {
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+
+  // DELIVERY METHOD TOGGLE
+  document.querySelectorAll('.toggle-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.toggle-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const method = btn.dataset.method;
+      document.getElementById('deliveryEmail').style.display = method === 'email' ? 'block' : 'none';
+      document.getElementById('deliveryPhone').style.display = method === 'whatsapp' ? 'block' : 'none';
+    });
+  });
+</script>
+
+</body>
+</html>
