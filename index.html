@@ -372,6 +372,138 @@
   }
   .delivery-input:focus { outline: none; border-color: var(--gold); }
 
+  /* ============== MEJORAS BOX ============== */
+  .mejoras-box {
+    margin-top: 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: white;
+    overflow: hidden;
+  }
+  .mejoras-toggle {
+    width: 100%;
+    background: var(--bg);
+    border: none;
+    padding: 12px 14px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    font-family: inherit;
+    text-align: left;
+    transition: background .2s;
+  }
+  .mejoras-toggle:hover { background: var(--cream); }
+  .mejoras-icon {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--green-2);
+    color: white;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: bold;
+    flex-shrink: 0;
+    transition: transform .25s;
+  }
+  .mejoras-box.open .mejoras-icon { transform: rotate(45deg); background: var(--gold); }
+  .mejoras-title {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 14px;
+  }
+  .mejoras-hint {
+    color: var(--muted);
+    font-size: 12px;
+    margin-left: auto;
+  }
+  .mejoras-content {
+    display: none;
+    padding: 14px;
+    background: white;
+    border-top: 1px solid var(--line);
+    max-height: 480px;
+    overflow-y: auto;
+  }
+  .mejoras-box.open .mejoras-content { display: block; }
+  .mej-group {
+    margin-bottom: 18px;
+  }
+  .mej-group:last-child { margin-bottom: 0; }
+  .mej-grouptitle {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--gold-2);
+    font-weight: 700;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 8px;
+  }
+  .mej-opt {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--muted);
+    font-size: 10px;
+    margin-left: 4px;
+  }
+  .mej-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink);
+    border-radius: 6px;
+    transition: background .15s;
+  }
+  .mej-item:hover { background: var(--bg); }
+  .mej-item input[type=checkbox] {
+    width: 16px; height: 16px;
+    accent-color: var(--green-2);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .mej-item span { flex: 1; }
+  .mej-item input[type=number] {
+    width: 90px;
+    padding: 4px 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--ink);
+    background: white;
+    text-align: right;
+  }
+  .mej-item input[type=number]:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+  .mej-item.single span { flex: 1; }
+  .mej-radiogroup {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    padding: 6px 4px;
+    font-size: 12px;
+  }
+  .mej-rlabel {
+    color: var(--ink); font-weight: 500;
+    margin-right: 6px;
+    min-width: 130px;
+  }
+  .mej-radiogroup label {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    background: white;
+    transition: all .15s;
+    font-size: 11px;
+    color: var(--ink-2);
+  }
+  .mej-radiogroup label:hover { border-color: var(--gold); }
+  .mej-radiogroup input[type=radio] {
+    accent-color: var(--green-2);
+    cursor: pointer;
+  }
+
   /* ============== TRUST STRIP ============== */
   .trust {
     background: white;
@@ -954,6 +1086,82 @@
           <input type="tel" class="delivery-input" id="deliveryPhone" placeholder="+54 9 11 1234 5678" style="display:none">
         </div>
 
+        <!-- ============ MEJORAS DEL CAMPO ============ -->
+        <div class="mejoras-box" id="mejorasBox">
+          <button type="button" class="mejoras-toggle" id="mejorasToggle">
+            <span class="mejoras-icon" id="mejorasIcon">+</span>
+            <span class="mejoras-title">Mejoras del campo</span>
+            <span class="mejoras-hint">opcional · suma valor al informe</span>
+          </button>
+          <div class="mejoras-content" id="mejorasContent">
+
+            <div class="mej-group">
+              <div class="mej-grouptitle">Habitabilidad</div>
+              <label class="mej-item"><input type="checkbox" data-key="casa_principal"><span>Casa principal</span><input type="number" min="0" placeholder="m²" data-key="casa_principal_m2"></label>
+              <label class="mej-item"><input type="checkbox" data-key="casas_personal"><span>Casa(s) de personal / puesto</span><input type="number" min="0" placeholder="cantidad" data-key="casas_personal_n"></label>
+              <label class="mej-item"><input type="checkbox" data-key="galpon_servicios"><span>Galpón de servicios</span><input type="number" min="0" placeholder="cantidad" data-key="galpon_servicios_n"></label>
+            </div>
+
+            <div class="mej-group">
+              <div class="mej-grouptitle">Agua y aguadas</div>
+              <label class="mej-item"><input type="checkbox" data-key="molinos"><span>Molinos</span><input type="number" min="0" placeholder="cantidad" data-key="molinos_n"></label>
+              <label class="mej-item"><input type="checkbox" data-key="tanques"><span>Tanques australianos</span><input type="number" min="0" placeholder="cantidad" data-key="tanques_n"></label>
+              <label class="mej-item"><input type="checkbox" data-key="bombas"><span>Bombas / perforaciones</span><input type="number" min="0" placeholder="cantidad" data-key="bombas_n"></label>
+              <label class="mej-item"><input type="checkbox" data-key="reservorios"><span>Reservorios / represas</span><input type="number" min="0" placeholder="cantidad" data-key="reservorios_n"></label>
+              <label class="mej-item"><input type="checkbox" data-key="bebederos"><span>Bebederos</span><input type="number" min="0" placeholder="cantidad" data-key="bebederos_n"></label>
+            </div>
+
+            <div class="mej-group">
+              <div class="mej-grouptitle">Manejo ganadero</div>
+              <label class="mej-item"><input type="checkbox" data-key="manga_corral"><span>Manga + corral</span><input type="number" min="0" placeholder="cantidad" data-key="manga_corral_n"></label>
+              <label class="mej-item single"><input type="checkbox" data-key="embarcadero"><span>Embarcadero / cargadero</span></label>
+              <label class="mej-item single"><input type="checkbox" data-key="romana"><span>Romana / báscula</span></label>
+              <label class="mej-item single"><input type="checkbox" data-key="brete"><span>Brete / cepo</span></label>
+            </div>
+
+            <div class="mej-group">
+              <div class="mej-grouptitle">Producción y almacenamiento</div>
+              <label class="mej-item"><input type="checkbox" data-key="silos_grano"><span>Silos de grano fijos</span><input type="number" min="0" placeholder="cantidad" data-key="silos_grano_n"></label>
+              <label class="mej-item"><input type="checkbox" data-key="silo_bolsa"><span>Silo bolsa (capacidad típica campaña)</span><input type="number" min="0" placeholder="cantidad" data-key="silo_bolsa_n"></label>
+              <label class="mej-item"><input type="checkbox" data-key="galpon_maq"><span>Galpón para maquinaria</span><input type="number" min="0" placeholder="cantidad" data-key="galpon_maq_n"></label>
+              <label class="mej-item"><input type="checkbox" data-key="tanque_combustible"><span>Tanque cisterna combustible</span><input type="number" min="0" placeholder="litros" data-key="tanque_combustible_l"></label>
+            </div>
+
+            <div class="mej-group">
+              <div class="mej-grouptitle">Servicios y accesos</div>
+              <div class="mej-radiogroup"><span class="mej-rlabel">Conexión eléctrica</span>
+                <label><input type="radio" name="r_electrico" value="en_campo">En campo</label>
+                <label><input type="radio" name="r_electrico" value="cerca">A &lt;1 km</label>
+                <label><input type="radio" name="r_electrico" value="lejano">Lejana</label>
+                <label><input type="radio" name="r_electrico" value="sin">Sin</label>
+              </div>
+              <div class="mej-radiogroup"><span class="mej-rlabel">Camino de acceso</span>
+                <label><input type="radio" name="r_camino" value="asfalto">Asfalto</label>
+                <label><input type="radio" name="r_camino" value="consolidado">Consolidado</label>
+                <label><input type="radio" name="r_camino" value="tierra">Tierra</label>
+                <label><input type="radio" name="r_camino" value="huella">Huella</label>
+              </div>
+              <div class="mej-radiogroup"><span class="mej-rlabel">Alambrado perimetral</span>
+                <label><input type="radio" name="r_alambrado" value="bueno">Bueno</label>
+                <label><input type="radio" name="r_alambrado" value="regular">Regular</label>
+                <label><input type="radio" name="r_alambrado" value="malo">Malo</label>
+              </div>
+              <label class="mej-item"><input type="checkbox" data-key="tranqueras"><span>Tranqueras</span><input type="number" min="0" placeholder="cantidad" data-key="tranqueras_n"></label>
+              <label class="mej-item"><input type="checkbox" data-key="generador_solar"><span>Generador propio o paneles solares</span><input type="number" min="0" placeholder="kW" data-key="generador_solar_kw"></label>
+            </div>
+
+            <div class="mej-group">
+              <div class="mej-grouptitle">Biológicas y productivas <span class="mej-opt">(opcional avanzado)</span></div>
+              <label class="mej-item"><input type="checkbox" data-key="monte_natural"><span>Monte natural</span><input type="number" min="0" placeholder="ha" data-key="monte_natural_ha"></label>
+              <label class="mej-item"><input type="checkbox" data-key="pasturas_implantadas"><span>Pasturas implantadas</span><input type="number" min="0" placeholder="ha" data-key="pasturas_implantadas_ha"></label>
+              <label class="mej-item"><input type="checkbox" data-key="riego"><span>Riego (artificial)</span><input type="number" min="0" placeholder="ha bajo riego" data-key="riego_ha"></label>
+              <label class="mej-item single"><input type="checkbox" data-key="tambo_cabana"><span>Tambo / cabaña con genética</span></label>
+            </div>
+
+          </div>
+        </div>
+        <!-- ============ /MEJORAS DEL CAMPO ============ -->
+
         <button class="btn-primary" id="ctaBtn" disabled style="opacity:.5">
           Subí un KML para continuar
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -1383,6 +1591,42 @@
     });
   });
 
+  // ============ MEJORAS DEL CAMPO ============
+  const mejorasBox = document.getElementById('mejorasBox');
+  document.getElementById('mejorasToggle').addEventListener('click', () => {
+    mejorasBox.classList.toggle('open');
+  });
+
+  // Auto-marcar checkbox cuando el cliente escribe número
+  document.querySelectorAll('.mej-item input[type=number]').forEach(num => {
+    num.addEventListener('input', () => {
+      const cb = num.parentElement.querySelector('input[type=checkbox]');
+      if (cb && num.value && parseFloat(num.value) > 0) cb.checked = true;
+      else if (cb && !num.value) cb.checked = false;
+    });
+  });
+
+  // Helper que recolecta el JSON de mejoras
+  window.recolectarMejoras = function() {
+    const mejoras = {};
+    document.querySelectorAll('.mej-item input[type=checkbox]').forEach(cb => {
+      if (!cb.checked) return;
+      const key = cb.dataset.key;
+      const numInput = cb.parentElement.querySelector('input[type=number]');
+      if (numInput && numInput.value) {
+        mejoras[key] = parseFloat(numInput.value);
+      } else {
+        mejoras[key] = true;
+      }
+    });
+    document.querySelectorAll('.mej-radiogroup input[type=radio]:checked').forEach(rb => {
+      // name = "r_electrico" -> key = "electrico"
+      const key = rb.name.replace(/^r_/, '');
+      mejoras[key] = rb.value;
+    });
+    return mejoras;
+  };
+
   // ============ BACKEND SUBMIT — flow DESCARGA DIRECTA ============
   // Backend levantado vía Cloudflare Tunnel (gratuito, temporal).
   // Cuando deployemos al VPS, cambiar a "https://informes-api.alvaradotierras.com"
@@ -1560,12 +1804,14 @@
     btn.innerHTML = 'Enviando...';
 
     const nombreCampo = window._currentKmlFile.name.replace(/\.[^.]+$/, '');
+    const mejorasObj = (typeof window.recolectarMejoras === 'function') ? window.recolectarMejoras() : {};
+    const mejorasJson = JSON.stringify(mejorasObj);
     const fd = new FormData();
     fd.append('kml', window._currentKmlFile);
     fd.append('nombre_campo', nombreCampo);
     fd.append('canal', 'descarga');
     fd.append('contacto', '');
-    fd.append('mejoras', '');
+    fd.append('mejoras', mejorasJson);
     fd.append('nombre_cliente', '');
 
     try {
