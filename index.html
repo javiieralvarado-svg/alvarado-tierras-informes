@@ -1386,7 +1386,7 @@
   // ============ BACKEND SUBMIT — flow DESCARGA DIRECTA ============
   // Backend levantado vía Cloudflare Tunnel (gratuito, temporal).
   // Cuando deployemos al VPS, cambiar a "https://informes-api.alvaradotierras.com"
-  const BACKEND_URL = "https://component-realized-foreign-employed.trycloudflare.com";
+  const BACKEND_URL = "https://slot-major-tubes-upload.trycloudflare.com";
 
   function showError(msg) {
     let errBox = document.getElementById('submitError');
@@ -1435,6 +1435,7 @@
     const card = document.querySelector('.hero-upload');
     if (!card) return;
     const downloadUrl = BACKEND_URL + '/api/jobs/' + jobId + '/pdf';
+    const videoUrl = BACKEND_URL + '/api/jobs/' + jobId + '/timelapse';
     card.innerHTML = `
       <div style="text-align:center; padding:30px 10px;">
         <div style="width:72px; height:72px; margin:0 auto 18px; border-radius:50%;
@@ -1448,15 +1449,26 @@
           ¡Tu informe está listo!
         </h3>
         <p style="font-family:'Inter',sans-serif; color:#5a4a36; font-size:14px; margin-bottom:24px;">
-          Generamos el PDF de ambientación de <strong>${nombreCampo}</strong>.
+          Generamos el informe de ambientación de <strong>${nombreCampo}</strong>.
         </p>
-        <a href="${downloadUrl}" download
-           style="display:inline-block; background:#3f4d28; color:white; padding:16px 30px;
-                  border-radius:10px; font-family:'Inter',sans-serif; font-weight:600;
-                  text-decoration:none; font-size:15px;">
-          Descargar PDF →
-        </a>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <a href="${downloadUrl}" download
+             style="display:inline-block; background:#3f4d28; color:white; padding:14px 22px;
+                    border-radius:10px; font-family:'Inter',sans-serif; font-weight:600;
+                    text-decoration:none; font-size:14px;">
+            Descargar PDF →
+          </a>
+          <a href="${videoUrl}" target="_blank"
+             style="display:inline-block; background:#b08947; color:white; padding:14px 22px;
+                    border-radius:10px; font-family:'Inter',sans-serif; font-weight:600;
+                    text-decoration:none; font-size:14px;">
+            ▶ Ver Timelapse 8 años
+          </a>
+        </div>
         <p style="font-family:'Inter',sans-serif; font-size:11px; color:#8a7a62; margin-top:18px;">
+          El timelapse muestra cómo evolucionó tu campo entre 2018 y 2025 (4 escenas/año).
+        </p>
+        <p style="font-family:'Inter',sans-serif; font-size:10px; color:#8a7a62; margin-top:6px;">
           ID: ${jobId}
         </p>
       </div>
