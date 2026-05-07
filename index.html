@@ -1620,9 +1620,8 @@
   };
 
   // ============ BACKEND SUBMIT — flow DESCARGA DIRECTA ============
-  // Backend levantado vía Cloudflare Tunnel (gratuito, temporal).
-  // Cuando deployemos al VPS, cambiar a "https://informes-api.alvaradotierras.com"
-  const BACKEND_URL = "https://clock-toolbox-proudly-smell.trycloudflare.com";
+  // Backend production: VPS Vultr + dominio Don Web (deployado 2026-05-07)
+  const BACKEND_URL = "https://informes.alvaradotierras.com";
 
   function showError(msg) {
     let errBox = document.getElementById('submitError');
